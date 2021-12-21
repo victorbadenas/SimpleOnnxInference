@@ -1,6 +1,8 @@
+#ifndef TESTONNXRUNTIME_VECTOROPERATIONS_H
+#define TESTONNXRUNTIME_VECTOROPERATIONS_H
+
 #include <vector>
 #include <iostream>
-
 
 template <typename T>
 T vectorProduct(const std::vector<T>& v)
@@ -23,3 +25,5 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& v)
     os << "]";
     return os;
 }
+
+#endif //TESTONNXRUNTIME_VECTOROPERATIONS_H

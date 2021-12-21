@@ -32,7 +32,10 @@ int main(int argc, char** argv){
     std::cout << "modelPath: " << modelPath << std::endl;
     std::cout << "debug: " << debug << std::endl;
 
-    OnnxInferenceRunner onnxInferenceRunner(modelPath);
+    OnnxInferenceRunner onnxInferenceRunner;
+    std::cout << onnxInferenceRunner.toString() << std::endl;
+    onnxInferenceRunner.loadModel(modelPath);
+    std::cout << onnxInferenceRunner.toString() << std::endl;
 
     return 0;
 }

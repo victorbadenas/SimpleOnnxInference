@@ -1,3 +1,6 @@
+#ifndef TESTONNXRUNTIME_FILESYSTEM_H
+#define TESTONNXRUNTIME_FILESYSTEM_H
+
 #include <filesystem>
 #include <string>
 
@@ -10,3 +13,5 @@ public:
     static bool checkFileExtension(fs::path &pathToFile, std::string extension);
     static bool checkFileExtension(std::string &pathToFile, std::string extension);
 };
+
+#endif //TESTONNXRUNTIME_FILESYSTEM_H

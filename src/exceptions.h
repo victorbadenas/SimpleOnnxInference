@@ -1,3 +1,6 @@
+#ifndef TESTONNXRUNTIME_EXCEPTIONS_H
+#define TESTONNXRUNTIME_EXCEPTIONS_H
+
 #include <string>
 #include <stdexcept>
 
@@ -10,3 +13,5 @@ class WrongFileExtension : public std::runtime_error {
 public:
     WrongFileExtension(std::string path, std::string extension) : std::runtime_error(path + " does not have \"" + extension + "\" extension") {};
 };
+
+#endif //TESTONNXRUNTIME_EXCEPTIONS_H
