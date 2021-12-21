@@ -52,8 +52,17 @@ if(onnxruntime_USE_DML)
   add_definitions(-DUSE_DML)
 endif()
 
+add_library(utils STATIC
+  src/FileSystem.h
+  src/FileSystem.cpp
+  src/vectorOperations.h
+  src/exceptions.h
+  src/OnnxInferenceRunner.h
+  src/OnnxInferenceRunner.cpp
+)
+
 include_directories("${ONNXRUNTIME_ROOTDIR}/include" "${ONNXRUNTIME_ROOTDIR}/include/onnxruntime/core/session")
 link_directories("${ONNXRUNTIME_ROOTDIR}/lib")
 
 add_executable(main src/main.cpp)
-target_link_libraries(main PRIVATE onnxruntime)
+target_link_libraries(main PUBLIC utils PRIVATE onnxruntime)

@@ -1,7 +1,7 @@
 #include <iostream>
-#include <onnxruntime_cxx_api.h>
 #include <cxxopts.hpp>
-#include <filesystem>
+#include "OnnxInferenceRunner.h"
+
 namespace fs = std::filesystem;
 
 cxxopts::ParseResult parseArgumentsFromCommandLine(int argc, char** argv) {
@@ -31,6 +31,8 @@ int main(int argc, char** argv){
     std::cout << "Running " << argv[0] << " with args:" << std::endl;
     std::cout << "modelPath: " << modelPath << std::endl;
     std::cout << "debug: " << debug << std::endl;
+
+    OnnxInferenceRunner onnxInferenceRunner(modelPath);
 
     return 0;
 }
