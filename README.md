@@ -13,12 +13,13 @@
 ```bash
 mkdir build
 cd build
-cmake -DONNXRUNTIME_ROOTDIR="~/.local/include/onnxruntime" -v ..
+conan install ..
+cmake -DONNXRUNTIME_ROOTDIR="~/.local/include/onnxruntime" ..
 make
 ```
 
 ## run
 
 ```bash
-./main
+./bin/main
 ```
