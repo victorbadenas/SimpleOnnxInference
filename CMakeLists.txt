@@ -27,7 +27,7 @@ if(NOT ONNXRUNTIME_ROOTDIR)
   message(FATAL_ERROR "please specify the installation path for ONNXRUNTIME_ROOTDIR to cmake")
 endif()
 
-message(STATUS ${ONNXRUNTIME_ROOTDIR})
+message(STATUS "OnnRuntime directory: ${ONNXRUNTIME_ROOTDIR}")
 
 if(onnxruntime_USE_CUDA)
   add_definitions(-DUSE_CUDA)
