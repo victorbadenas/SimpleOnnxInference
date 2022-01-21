@@ -5,14 +5,23 @@ project(main VERSION 0.1.0 LANGUAGES C CXX)
 if (WIN32)
     string(APPEND CMAKE_CXX_FLAGS " /W4")
 else()
-    string(APPEND CMAKE_CXX_FLAGS " -Wall -Wextra")
+    string(APPEND CMAKE_CXX_FLAGS " -D_GLIBCXX_USE_CXX11_ABI=0 -Wall -Wextra")
     string(APPEND CMAKE_C_FLAGS " -Wall -Wextra")
 endif()
 
 set (CMAKE_CXX_STANDARD 20)
+set(BUILD_SHARED_LIBS ON)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_BINARY_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+find_package(cxxopts REQUIRED)
+find_package(OpenCV 3 REQUIRED core imgproc imgcodecs)
+
+message(STATUS "${opencv_LIBS}")
+message(STATUS ${opencv_INCLUDE_DIRS})
 
 #onnxruntime providers
 option(onnxruntime_USE_CUDA "Build with CUDA support" OFF)
@@ -60,9 +69,9 @@ add_library(utils STATIC
     src/OnnxInferenceRunner.h
     src/OnnxInferenceRunner.cpp
 )
-
-include_directories("${ONNXRUNTIME_ROOTDIR}/include" "${ONNXRUNTIME_ROOTDIR}/include/onnxruntime/core/session")
+target_link_libraries(utils PUBLIC ${opencv_LIBS} ${CMAKE_DL_LIBS})
+include_directories("${ONNXRUNTIME_ROOTDIR}/include" "${ONNXRUNTIME_ROOTDIR}/include/onnxruntime/core/session" ${opencv_INCLUDE_DIRS} )
 link_directories("${ONNXRUNTIME_ROOTDIR}/lib")
 
 add_executable(main src/main.cpp)
-target_link_libraries(main PUBLIC utils PRIVATE onnxruntime)
+target_link_libraries(main PUBLIC utils PRIVATE onnxruntime cxxopts::cxxopts)

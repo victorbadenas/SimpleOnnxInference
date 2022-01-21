@@ -2,6 +2,7 @@
 #define TESTONNXRUNTIME_ONNXINFERENCERUNNER_H
 
 #include <onnxruntime_cxx_api.h>
+#include <opencv2/core/mat.hpp>
 #include "FileSystem.h"
 #include "exceptions.h"
 #include "vectorOperations.h"
@@ -24,8 +25,12 @@ public:
     OnnxInferenceRunner();
     void loadModel(fs::path modelPath);
     const std::string toString();
+
+    std::vector<float> run(fs::path imagePath);
+    std::vector<float> run(cv::Mat imageData);
 private:
     void loadParameters();
+    cv::Mat preprocessImage(cv::Mat imageData);
 
     fs::path m_modelPath = "";
     Ort::Env m_environment;
