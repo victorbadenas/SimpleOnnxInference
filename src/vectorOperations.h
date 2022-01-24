@@ -11,6 +11,11 @@ T vectorProduct(const std::vector<T>& v)
 }
 
 template <typename T>
+void copyVector(std::vector<T> source, std::vector<T>& target) {
+    std::copy(source.begin(), source.end(), std::back_inserter(target));
+}
+
+template <typename T>
 std::ostream& operator<<(std::ostream& os, const std::vector<T>& v)
 {
     os << "[";

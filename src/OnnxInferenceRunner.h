@@ -18,25 +18,27 @@ struct NodeParameters {
 struct SessionParameters {
     NodeParameters input;
     NodeParameters output;
+
+    void toString(std::ostream &os) const;
+    [[nodiscard]] std::string toString() const;
 };
 
 class OnnxInferenceRunner {
 public:
-    OnnxInferenceRunner();
-    void loadModel(fs::path modelPath);
-    const std::string toString();
+    OnnxInferenceRunner(fs::path& modelPath, Ort::SessionOptions& sessionOptions);
+    std::string toString();
 
     std::vector<float> run(fs::path imagePath);
-    std::vector<float> run(cv::Mat imageData);
+    std::vector<float> run();
 private:
+    Ort::Session loadModel(fs::path modelPath);
     void loadParameters();
     cv::Mat preprocessImage(cv::Mat imageData);
 
-    fs::path m_modelPath = "";
     Ort::Env m_environment;
     Ort::SessionOptions m_sessionOptions;
     SessionParameters m_sessionParameters;
-    std::unique_ptr<Ort::Session> m_session = NULL;
+    Ort::Session m_session;
 };
 
 #endif //TESTONNXRUNTIME_ONNXINFERENCERUNNER_H

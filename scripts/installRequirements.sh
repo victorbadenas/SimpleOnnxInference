@@ -1,8 +1,18 @@
 #!/usr/bin/env bash
 
-# Install libraries for opencv
+# Install opencv
 
-sudo apt install -y libgtk2.0-dev libva-dev libvdpau-dev
+sudo apt-get install build-essential unzip
+sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
+sudo apt-get install libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libdc1394-22-dev
+
+wget https://github.com/opencv/opencv/archive/refs/tags/3.4.16.zip
+unzip 3.4.16.zip
+mkdir -p opencv-3.4.16/build
+cd opencv-3.4.16/build
+cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local ..
+make -j12
+sudo make install
 
 # OnnxInstallation
 

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-# Project
+# Project and compilation flags
 project(main VERSION 0.1.0 LANGUAGES C CXX)
 if (WIN32)
     string(APPEND CMAKE_CXX_FLAGS " /W4")
@@ -12,18 +12,26 @@ endif()
 set (CMAKE_CXX_STANDARD 20)
 set(BUILD_SHARED_LIBS ON)
 
+# basic conan config
+message(STATUS ${CMAKE_BINARY_DIR})
+message(STATUS ${CMAKE_SOURCE_DIR})
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
+# add external cmake files
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_BINARY_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+# find packages
 find_package(cxxopts REQUIRED)
-find_package(OpenCV 3 REQUIRED core imgproc imgcodecs)
+find_package(OpenCV REQUIRED)
 
-message(STATUS "${opencv_LIBS}")
-message(STATUS ${opencv_INCLUDE_DIRS})
+# opencv variable logging
+message(STATUS "OpenCV_FOUND: ${OpenCV_FOUND}")
+message(STATUS "OpenCV_LIBS: ${OpenCV_LIBS}")
+message(STATUS "OpenCV_INCLUDE_DIRS: ${OpenCV_INCLUDE_DIRS}")
+message(STATUS "OpenCV_VERSION: ${OpenCV_VERSION}")
 
-#onnxruntime providers
+# onnxruntime providers
 option(onnxruntime_USE_CUDA "Build with CUDA support" OFF)
 option(onnxruntime_USE_OPENVINO "Build with OpenVINO support" OFF)
 option(onnxruntime_USE_NNAPI_BUILTIN "Build with builtin NNAPI lib for Android NNAPI support" OFF)
@@ -36,6 +44,7 @@ if(NOT ONNXRUNTIME_ROOTDIR)
     message(FATAL_ERROR "please specify the installation path for ONNXRUNTIME_ROOTDIR to cmake")
 endif()
 
+# onnxruntime debug log
 message(STATUS "OnnRuntime directory: ${ONNXRUNTIME_ROOTDIR}")
 
 if(onnxruntime_USE_CUDA)
@@ -61,6 +70,10 @@ if(onnxruntime_USE_DML)
     add_definitions(-DUSE_DML)
 endif()
 
+# # project library bindings
+include_directories("${ONNXRUNTIME_ROOTDIR}/include" "${ONNXRUNTIME_ROOTDIR}/include/onnxruntime/core/session" ${OpenCV_INCLUDE_DIRS} )
+link_directories("${ONNXRUNTIME_ROOTDIR}/lib")
+
 add_library(utils STATIC
     src/FileSystem.h
     src/FileSystem.cpp
@@ -69,9 +82,11 @@ add_library(utils STATIC
     src/OnnxInferenceRunner.h
     src/OnnxInferenceRunner.cpp
 )
-target_link_libraries(utils PUBLIC ${opencv_LIBS} ${CMAKE_DL_LIBS})
-include_directories("${ONNXRUNTIME_ROOTDIR}/include" "${ONNXRUNTIME_ROOTDIR}/include/onnxruntime/core/session" ${opencv_INCLUDE_DIRS} )
-link_directories("${ONNXRUNTIME_ROOTDIR}/lib")
+
+target_link_libraries(utils PUBLIC ${OpenCV_LIBS})
 
 add_executable(main src/main.cpp)
-target_link_libraries(main PUBLIC utils PRIVATE onnxruntime cxxopts::cxxopts)
+target_link_libraries(main PUBLIC utils onnxruntime cxxopts::cxxopts)
+
+# add_executable(main src/test.cpp)
+# target_link_libraries(main PUBLIC onnxruntime ${OpenCV_LIBS})
