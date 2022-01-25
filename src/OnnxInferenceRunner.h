@@ -17,8 +17,6 @@ class OnnxInferenceRunner {
 public:
     OnnxInferenceRunner();
     std::string toString();
-    void CreateEnv();
-    void CreateSessionOptions();
     void loadModel(fs::path modelPath);
 
     std::vector<float> run(fs::path imagePath);
@@ -38,16 +36,26 @@ private:
     Ort::Env m_environment = Ort::Env(nullptr);
     Ort::SessionOptions m_sessionOptions = Ort::SessionOptions(nullptr);
     std::shared_ptr<Ort::Session> m_session;
+    Ort::MemoryInfo m_memoryInfo = Ort::MemoryInfo::CreateCpu(
+            OrtAllocatorType::OrtArenaAllocator,
+            OrtMemType::OrtMemTypeDefault);
 
     // Getter Graph parameters
     size_t GetSessionInputCount();
     size_t GetSessionOutputCount();
     std::vector<int64_t> GetSessionInputNodeDims(size_t index);
     std::vector<int64_t> GetSessionOutputNodeDims(size_t index);
-    const char *GetSessionInputName(size_t index, OrtAllocator *allocator);
-    const char *GetSessionOutputName(size_t index, OrtAllocator *allocator);
+    const char *GetSessionInputName(size_t index);
+    const char *GetSessionOutputName(size_t index);
     ONNXTensorElementDataType GetSessionInputNodeType(size_t index);
     ONNXTensorElementDataType GetSessionOutputType(size_t index);
+
+    // Inference aux methods
+    void prepareBuffers(cv::Mat inputImage, std::vector<float>& vector, std::vector<float>& vector1);
+
+    // Setup methods
+    void CreateEnv();
+    void CreateSessionOptions();
 };
 
 #endif //TESTONNXRUNTIME_ONNXINFERENCERUNNER_H

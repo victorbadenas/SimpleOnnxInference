@@ -35,8 +35,6 @@ int main(int argc, char** argv){
     std::cout << "debug: " << debug << std::endl;
 
     OnnxInferenceRunner onnxInferenceRunner;
-    onnxInferenceRunner.CreateEnv();
-    onnxInferenceRunner.CreateSessionOptions();
     onnxInferenceRunner.loadModel(modelPath);
     std::cout << onnxInferenceRunner.toString() << std::endl;
     std::cout << onnxInferenceRunner.run(imagePath) << std::endl;

@@ -3,11 +3,12 @@
 
 #include <vector>
 #include <iostream>
+#include <numeric>
 
 template <typename T>
 T vectorProduct(const std::vector<T>& v)
 {
-    return accumulate(v.begin(), v.end(), 1, std::multiplies<T>());
+    return std::accumulate(v.begin(), v.end(), 1, std::multiplies<T>());
 }
 
 template <typename T>
