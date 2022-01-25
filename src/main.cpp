@@ -32,11 +32,10 @@ int main(int argc, char** argv){
     std::cout << "modelPath: " << modelPath << std::endl;
     std::cout << "debug: " << debug << std::endl;
 
-    Ort::SessionOptions sessionOptions;
-    sessionOptions.SetIntraOpNumThreads(1);
-    sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_DISABLE_ALL);
-
-    OnnxInferenceRunner onnxInferenceRunner(modelPath, sessionOptions);
+    OnnxInferenceRunner onnxInferenceRunner;
+    onnxInferenceRunner.CreateEnv();
+    onnxInferenceRunner.CreateSessionOptions();
+    onnxInferenceRunner.loadModel(modelPath);
     std::cout << onnxInferenceRunner.toString() << std::endl;
 
     return 0;

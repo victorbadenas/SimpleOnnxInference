@@ -1,73 +1,39 @@
 #include "OnnxInferenceRunner.h"
 
 
-void SessionParameters::toString(std::ostream& ss) const {
-    ss << "Number of Input Nodes: " << input.nodes << std::endl;
-    ss << "Input Name: " << input.name << std::endl;
-    ss << "Input Type: " << input.type << std::endl;
-    ss << "Input Dimensions: " << input.shape << std::endl;
-
-    ss << "Number of Output Nodes: " << output.nodes << std::endl;
-    ss << "Output Name: " << output.name << std::endl;
-    ss << "Output Type: " << output.type << std::endl;
-    ss << "Output Dimensions: " << output.shape << std::endl;
-}
-
-std::string SessionParameters::toString() const {
-    std::ostringstream ss;
-    toString(ss);
-    return ss.str();
-}
-
 OnnxInferenceRunner::OnnxInferenceRunner(
-    fs::path& modelPath,
-    Ort::SessionOptions& sessionOptions
 ):
-    m_environment(OrtLoggingLevel::ORT_LOGGING_LEVEL_WARNING, "test"),
-    m_sessionOptions(std::move(sessionOptions)),
-    m_session(loadModel(modelPath))
+    m_loggingLevel(OrtLoggingLevel::ORT_LOGGING_LEVEL_WARNING),
+    m_intraNumThreads(0),
+    m_graphOptLevel(GraphOptimizationLevel::ORT_DISABLE_ALL),
+    m_logId("")
 {
-    loadParameters();
 }
 
-Ort::Session OnnxInferenceRunner::loadModel(fs::path modelPath) {
-    if (!FileSystem::fileExists(modelPath))
-    {
+void OnnxInferenceRunner::loadModel(fs::path modelPath) {
+    if (!FileSystem::fileExists(modelPath)) {
         throw FileDoesNotExist(modelPath);
     }
-    else if (!FileSystem::checkFileExtension(modelPath, ".onnx"))
-    {
+    else if (!FileSystem::checkFileExtension(modelPath, ".onnx")) {
         throw WrongFileExtension(modelPath, ".onnx");
     }
-    return Ort::Session(m_environment, modelPath.c_str(), m_sessionOptions);
-}
-
-void OnnxInferenceRunner::loadParameters() {
-    Ort::AllocatorWithDefaultOptions allocator;
-    auto inputTensorInfo = m_session.GetInputTypeInfo(0).GetTensorTypeAndShapeInfo();
-    auto outputTensorInfo = m_session.GetOutputTypeInfo(0).GetTensorTypeAndShapeInfo();
-
-    m_sessionParameters.input.nodes = m_session.GetInputCount();
-    m_sessionParameters.input.name = m_session.GetInputName(0, allocator);
-    m_sessionParameters.input.type = inputTensorInfo.GetElementType();
-    copyVector(inputTensorInfo.GetShape(), m_sessionParameters.input.shape);
-
-    m_sessionParameters.output.nodes = m_session.GetOutputCount();
-    m_sessionParameters.output.name = m_session.GetOutputName(0, allocator);
-    m_sessionParameters.output.type = outputTensorInfo.GetElementType();
-    copyVector(outputTensorInfo.GetShape(), m_sessionParameters.output.shape);
-    std::cout << m_sessionParameters.toString() << std::endl;
-}
-
-std::string OnnxInferenceRunner::toString() {
-    if (!m_session) {
-        return "OnnxInferenceRunner not initialised.";
+    else if (m_sessionOptions == nullptr) {
+        throw std::runtime_error("Ort::SessionOptions not initialized.");
     }
+    else if (m_environment == nullptr) {
+        throw std::runtime_error("Ort::Env not initialized.");
+    }
+    m_session = std::make_shared<Ort::Session>(m_environment, modelPath.c_str(), m_sessionOptions);
+}
 
-    std::ostringstream os;
-    os << "OnnxInferenceRunner:" << std::endl << "sessionParameters:" << std::endl;
-    m_sessionParameters.toString(os);
-    return os.str();
+void OnnxInferenceRunner::CreateEnv() {
+    m_environment = Ort::Env(m_loggingLevel, m_logId.c_str());
+}
+
+void OnnxInferenceRunner::CreateSessionOptions() {
+    m_sessionOptions = Ort::SessionOptions();
+    m_sessionOptions.SetIntraOpNumThreads(m_intraNumThreads);
+    m_sessionOptions.SetGraphOptimizationLevel(m_graphOptLevel);
 }
 
 // std::vector<float> OnnxInferenceRunner::run(cv::Mat imageData) {
@@ -116,4 +82,116 @@ cv::Mat OnnxInferenceRunner::preprocessImage(cv::Mat imageData){
     // HWC to CHW
     cv::dnn::blobFromImage(resizedImage, preprocessedImage);
     */
+}
+
+size_t OnnxInferenceRunner::GetSessionInputCount() {
+    if (nullptr == m_session) {
+        throw std::runtime_error("Received null session pointer");
+    }
+    return m_session->GetInputCount();
+}
+
+size_t OnnxInferenceRunner::GetSessionOutputCount() {
+    if (nullptr == m_session) {
+        throw std::runtime_error("Received null session pointer");
+    }
+    return m_session->GetOutputCount();
+}
+
+std::vector<int64_t> OnnxInferenceRunner::GetSessionInputNodeDims(size_t index) {
+    if (nullptr == m_session) {
+        throw std::runtime_error("Received null session pointer");
+    }
+    return m_session->GetInputTypeInfo(index).GetTensorTypeAndShapeInfo().GetShape();
+}
+
+std::vector<int64_t> OnnxInferenceRunner::GetSessionOutputNodeDims(size_t index) {
+    if (nullptr == m_session) {
+        throw std::runtime_error("Received null session pointer");
+    }
+    return m_session->GetOutputTypeInfo(index).GetTensorTypeAndShapeInfo().GetShape();
+}
+
+ONNXTensorElementDataType OnnxInferenceRunner::GetSessionInputNodeType(size_t index) {
+    if (nullptr == m_session) {
+        throw std::runtime_error("Received null session pointer");
+    }
+    return m_session->GetInputTypeInfo(index).GetTensorTypeAndShapeInfo().GetElementType();
+}
+
+ONNXTensorElementDataType OnnxInferenceRunner::GetSessionOutputType(size_t index) {
+    if (nullptr == m_session) {
+        throw std::runtime_error("Received null session pointer");
+    }
+    return m_session->GetOutputTypeInfo(index).GetTensorTypeAndShapeInfo().GetElementType();
+}
+
+const char *OnnxInferenceRunner::GetSessionInputName(size_t index, OrtAllocator *allocator) {
+    if (nullptr == m_session) {
+        throw std::runtime_error("Received null session pointer");
+    }
+    if (nullptr == allocator) {
+        throw std::runtime_error("Received null session pointer");
+    }
+
+    return m_session->GetInputName(index, allocator);
+}
+
+const char *OnnxInferenceRunner::GetSessionOutputName(size_t index, OrtAllocator *allocator) {
+    if (nullptr == m_session) {
+        throw std::runtime_error("Received null session pointer");
+    }
+    if (nullptr == allocator) {
+        throw std::runtime_error("Received null session pointer");
+    }
+
+    return m_session->GetOutputName(index, allocator);
+}
+
+
+std::string OnnxInferenceRunner::toString() {
+    Ort::AllocatorWithDefaultOptions inputAllocator;
+    Ort::AllocatorWithDefaultOptions outputAllocator;
+
+    std::ostringstream os;
+    os << "OnnxInferenceRunner:" << std::endl;
+    os << "Number of Input Nodes: " << GetSessionInputCount() << std::endl;
+    for (size_t i = 0; i<GetSessionInputCount(); ++i) {
+        os << "Input " << i << ": ";
+        os << "Name=" << GetSessionInputName(i, inputAllocator) << ", ";
+        os << "Type=" << onnxDataTypeToString(GetSessionInputNodeType(i)) << ", ";
+        os << "Shape=" << GetSessionInputNodeDims(i) << std::endl;
+    }
+
+    os << "Number of Output Nodes: " << GetSessionOutputCount() << std::endl;
+    for (size_t i = 0; i<GetSessionOutputCount(); ++i) {
+        os << "Output " << i << ": ";
+        os << "Name=" << GetSessionOutputName(i, outputAllocator) << ", ";
+        os << "Type=" << onnxDataTypeToString(GetSessionOutputType(i)) << ", ";
+        os << "Shape=" << GetSessionOutputNodeDims(i) << std::endl;
+    }
+    return os.str();
+}
+
+std::string onnxDataTypeToString(ONNXTensorElementDataType dataType) {
+    std::map<ONNXTensorElementDataType, std::string> typeToStringMap({
+        {ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_UNDEFINED, "UNDEFINED"},
+        {ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT, "FLOAT"},
+        {ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT8, "UINT8"},
+        {ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_INT8, "INT8"},
+        {ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT16, "UINT16"},
+        {ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_INT16, "INT16"},
+        {ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_INT32, "INT32"},
+        {ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64, "INT64"},
+        {ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING, "STRING"},
+        {ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_BOOL, "BOOL"},
+        {ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT16, "FLOAT16"},
+        {ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_DOUBLE, "DOUBLE"},
+        {ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT32, "UINT32"},
+        {ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT64, "UINT64"},
+        {ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_COMPLEX64, "COMPLEX64"},
+        {ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_COMPLEX128, "COMPLEX128"},
+        {ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_BFLOAT16, "BFLOAT16"},
+    });
+    return typeToStringMap.at(dataType);
 }
