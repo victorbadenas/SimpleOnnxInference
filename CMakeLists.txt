@@ -78,6 +78,8 @@ add_library(utils STATIC
     src/FileSystem.h
     src/FileSystem.cpp
     src/vectorOperations.h
+    src/imageOperations.h
+    src/imageOperations.cpp
     src/exceptions.h
     src/OnnxInferenceRunner.h
     src/OnnxInferenceRunner.cpp

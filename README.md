@@ -16,7 +16,6 @@ For this project we need opencv and onnx. Both of them can be installed with the
 ## build
 
 ```bash
-mkdir build
 conan install -if build/ .
 cmake -DONNXRUNTIME_ROOTDIR="~/.local/include/onnxruntime" -DOpenCV_DIR="/usr/local/share/OpenCV" -S . -B build/
 make -C build/
@@ -25,5 +24,5 @@ make -C build/
 ## run
 
 ```bash
-./build/bin/main -m ${modelPath}
+./build/bin/main -m ${modelPath} -i ${imagePath}
 ```

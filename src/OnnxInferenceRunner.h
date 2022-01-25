@@ -3,9 +3,11 @@
 
 #include <onnxruntime_cxx_api.h>
 #include <opencv2/core/mat.hpp>
+#include <opencv2/dnn/dnn.hpp>
 #include "FileSystem.h"
 #include "exceptions.h"
 #include "vectorOperations.h"
+#include "imageOperations.h"
 #include <iostream>
 #include <map>
 
@@ -20,21 +22,24 @@ public:
     void loadModel(fs::path modelPath);
 
     std::vector<float> run(fs::path imagePath);
-    std::vector<float> run();
+    std::vector<float> run(cv::Mat imageData);
 private:
-
-//    void loadParameters();
+    // Image preprocessing
     cv::Mat preprocessImage(cv::Mat imageData);
+    cv::Mat resizeImage(cv::Mat imageData);
 
+    // Parameters
     OrtLoggingLevel m_loggingLevel;
     int m_intraNumThreads;
     GraphOptimizationLevel m_graphOptLevel;
     std::string m_logId;
+
+    // Onnx Variables
     Ort::Env m_environment = Ort::Env(nullptr);
     Ort::SessionOptions m_sessionOptions = Ort::SessionOptions(nullptr);
     std::shared_ptr<Ort::Session> m_session;
 
-
+    // Getter Graph parameters
     size_t GetSessionInputCount();
     size_t GetSessionOutputCount();
     std::vector<int64_t> GetSessionInputNodeDims(size_t index);
