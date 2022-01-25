@@ -1,4 +1,4 @@
-# TestOnnxRuntime
+# SimpleOnnxInference
 
 ![ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=flat&logo=ubuntu&logoColor=black)
 ![c++](https://img.shields.io/static/v1?label=C%2B%2B&message=20&color=blue&style=flat&logo=c%2B%2B&logoColor=blue&labelColor=white)
