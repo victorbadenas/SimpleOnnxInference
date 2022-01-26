@@ -34,7 +34,8 @@ cv::Mat normalizePerChannel(const cv::Mat& imageData, std::vector<float> means, 
     cv::Mat normalizedImage;
     cv::Mat channels[imageData.channels()];
     cv::split(imageData, channels);
-    for (size_t i=0; i<imageData.channels(); ++i) {
+
+    for (int i=0; i<imageData.channels(); ++i) {
         if (std[i] == 0.0f)
             throw std::runtime_error("division by 0");
         channels[i] = (channels[i] - means[i]) / std[i];

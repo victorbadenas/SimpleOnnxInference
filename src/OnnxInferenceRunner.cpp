@@ -44,35 +44,23 @@ void OnnxInferenceRunner::CreateSessionOptions() {
 
 /* inference member functions */
 
-// prepare buffers for inference
-void OnnxInferenceRunner::prepareBuffers(cv::Mat inputImage, std::vector<float>& inputBuffer, std::vector<float>& outputBuffer) {
-    size_t inputTensorSize = vectorProduct(GetSessionInputNodeDims(0));
-    size_t outputTensorSize = vectorProduct(GetSessionOutputNodeDims(0));
-    inputBuffer.resize(inputTensorSize);
-    inputBuffer.assign(inputImage.begin<float>(), inputImage.end<float>());
-    outputBuffer.resize(outputTensorSize);
-}
-
 // run inference for cv::Mat structure
 std::vector<float> OnnxInferenceRunner::run(cv::Mat imageData) {
     if (m_session == nullptr)
         throw std::runtime_error("Session not yet initialized (model not loaded)");
-    std::vector<float> inputBuffer, outputBuffer, outputTensor;
+
+    std::vector<int64_t> inputNodeDims = GetSessionInputNodeDims(0);
+    std::vector<int64_t> outputNodeDims = GetSessionOutputNodeDims(0);
+    size_t inputTensorSize = vectorProduct(inputNodeDims);
+    size_t outputTensorSize = vectorProduct(outputNodeDims);
+    std::vector<float> inputBuffer(inputTensorSize), outputBuffer(outputTensorSize);
     std::vector<const char*> inputNames{GetSessionInputName(0)}, outputNames{GetSessionOutputName(0)};
     std::vector<Ort::Value> inputTensors, outputTensors;
-    size_t inputTensorSize = vectorProduct(GetSessionInputNodeDims(0));
-    size_t outputTensorSize = vectorProduct(GetSessionOutputNodeDims(0));
-    prepareBuffers(imageData, inputBuffer, outputBuffer);
-    inputTensors.push_back(Ort::Value::CreateTensor<float>(
-            m_memoryInfo,
-            inputBuffer.data(), inputTensorSize,
-            GetSessionInputNodeDims(0).data(), GetSessionInputNodeDims(0).size()));
-    outputTensors.push_back(Ort::Value::CreateTensor<float>(
-            m_memoryInfo, outputBuffer.data(), outputTensorSize,
-            GetSessionOutputNodeDims(0).data(), GetSessionOutputNodeDims(0).size()));
-    m_session->Run(Ort::RunOptions{nullptr}, inputNames.data(),
-                inputTensors.data(), 1, outputNames.data(),
-                outputTensors.data(), 1);
+
+    inputBuffer.assign(imageData.begin<float>(), imageData.end<float>());
+    inputTensors.push_back(Ort::Value::CreateTensor<float>(m_memoryInfo, inputBuffer.data(), inputTensorSize, inputNodeDims.data(), inputNodeDims.size()));
+    outputTensors.push_back(Ort::Value::CreateTensor<float>(m_memoryInfo, outputBuffer.data(), outputTensorSize, outputNodeDims.data(), outputNodeDims.size()));
+    m_session->Run(Ort::RunOptions{nullptr}, inputNames.data(), inputTensors.data(), 1, outputNames.data(), outputTensors.data(), 1);
     return outputBuffer;
 }
 
@@ -85,29 +73,20 @@ std::vector<float> OnnxInferenceRunner::run(fs::path imagePath) {
 
 /* Input preprocessing functions */
 
-// resize input for onnx input.
-cv::Mat OnnxInferenceRunner::resizeImage(cv::Mat imageData) {
-    std::vector<int64_t> inputDims = GetSessionInputNodeDims(0);
-    cv::Mat resizedImage;
-    cv::resize(imageData, resizedImage,
-               cv::Size(inputDims.at(2), inputDims.at(3)),
-               cv::InterpolationFlags::INTER_CUBIC);
-    return resizedImage;
-}
-
 // preprocess image for network
-cv::Mat OnnxInferenceRunner::preprocessImage(cv::Mat imageData) {
+cv::Mat OnnxInferenceRunner::preprocessImage(const cv::Mat& imageData) {
     cv::Mat resizedImageBGR, resizedImageRGB, resizedImage, normalizedImage, preprocessedImage;
+    std::vector<int64_t> inputDims = GetSessionInputNodeDims(0);
 
-//    std::cout << "input image bgr: " << getImageInfo(imageData) << std::endl;
-    resizedImageBGR = resizeImage(imageData);
-//    std::cout << "resized image bgr: " << getImageInfo(resizedImageBGR) << std::endl;
+//    std::cout << "M = " << imageData << std::endl;
+    cv::resize(imageData, resizedImageBGR, cv::Size(inputDims.at(2), inputDims.at(3)), cv::InterpolationFlags::INTER_CUBIC);
+//    std::cout << "M = " << resizedImageBGR << std::endl;
     cv::cvtColor(resizedImageBGR, resizedImageRGB, cv::ColorConversionCodes::COLOR_BGR2RGB);
-//    std::cout << "resized image rgb: " << getImageInfo(resizedImageBGR) << std::endl;
+//    std::cout << "M = " << resizedImageRGB << std::endl;
     resizedImageRGB.convertTo(resizedImage, CV_32F, 1.0 / 255);
-//    std::cout << "resized image float[0,1] rgb: " << getImageInfo(resizedImage) << std::endl;
-    normalizedImage = normalizePerChannel(resizedImageRGB, std::vector<float>{0.485, 0.456, 0.406}, std::vector<float>{0.229, 0.224, 0.225});
-//    std::cout << "final preprocessed image: " << getImageInfo(normalizedImage) << std::endl;
+//    std::cout << "M = " << resizedImage << std::endl;
+    normalizedImage = normalizePerChannel(resizedImage, std::vector<float>{0.485, 0.456, 0.406}, std::vector<float>{0.229, 0.224, 0.225});
+//    std::cout << "M = " << normalizedImage << std::endl;
     cv::dnn::blobFromImage(normalizedImage, preprocessedImage);
     return preprocessedImage;
 }

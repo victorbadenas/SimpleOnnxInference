@@ -338,6 +338,8 @@ int main(int argc, char* argv[])
                 inputTensors.data(), 1, outputNames.data(),
                 outputTensors.data(), 1);
 
+    std::cout << outputTensorValues << std::endl;
+    return 0;
     int predId = 0;
     float activation = 0;
     float maxActivation = std::numeric_limits<float>::lowest();

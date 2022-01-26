@@ -23,8 +23,7 @@ public:
     std::vector<float> run(cv::Mat imageData);
 private:
     // Image preprocessing
-    cv::Mat preprocessImage(cv::Mat imageData);
-    cv::Mat resizeImage(cv::Mat imageData);
+    cv::Mat preprocessImage(const cv::Mat& imageData);
 
     // Parameters
     OrtLoggingLevel m_loggingLevel;
@@ -49,9 +48,6 @@ private:
     const char *GetSessionOutputName(size_t index);
     ONNXTensorElementDataType GetSessionInputNodeType(size_t index);
     ONNXTensorElementDataType GetSessionOutputType(size_t index);
-
-    // Inference aux methods
-    void prepareBuffers(cv::Mat inputImage, std::vector<float>& vector, std::vector<float>& vector1);
 
     // Setup methods
     void CreateEnv();

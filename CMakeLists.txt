@@ -90,5 +90,5 @@ target_link_libraries(utils PUBLIC ${OpenCV_LIBS})
 add_executable(main src/main.cpp)
 target_link_libraries(main PUBLIC utils onnxruntime cxxopts::cxxopts)
 
-# add_executable(main src/test.cpp)
-# target_link_libraries(main PUBLIC onnxruntime ${OpenCV_LIBS})
+add_executable(ref src/test.cpp)
+target_link_libraries(ref PUBLIC onnxruntime ${OpenCV_LIBS})
