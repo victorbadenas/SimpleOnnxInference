@@ -48,10 +48,10 @@ jobs:
 
       - name: installRequirements
         run: |
-#          pip3 install conan
-#          which conan
-#          conan install -if ${{github.workspace}}/build ${{github.workspace}}
           ./scripts/installRequirementsOsx.sh
+          pip3 install conan
+          which conan
+          conan install -if ${{github.workspace}}/build ${{github.workspace}}
 
       - name: Configure CMake
         run: cmake -DONNXRUNTIME_ROOTDIR="~/.local/include/onnxruntime" -DOpenCV_DIR="/usr/local/share/OpenCV" -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -S . -B ${{github.workspace}}/build
