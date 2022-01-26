@@ -21,7 +21,9 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: installRequirements
-      run: ./scripts/installRequirements.sh
+      run:
+      - conan install -if build/
+      - ./scripts/installRequirements.sh
 
     - name: Configure CMake
       run: cmake -DONNXRUNTIME_ROOTDIR="~/.local/include/onnxruntime" -DOpenCV_DIR="/usr/local/share/OpenCV" -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -S . -B ${{github.workspace}}/build
