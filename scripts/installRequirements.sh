@@ -27,8 +27,8 @@ function installOpenCV {
     unzip 3.4.16.zip
     mkdir -p opencv-3.4.16/build
     cd opencv-3.4.16/build
-    cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local ..
-    make -j12
+    cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local -D BUILD_LIST=core,improc,imgcodecs ..
+    make -j8
     sudo make install
 }
 
