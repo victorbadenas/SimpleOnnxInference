@@ -48,9 +48,9 @@ jobs:
 
       - name: installRequirements
         run: |
-          pip3 install conan
-          which conan
-          conan install -if ${{github.workspace}}/build ${{github.workspace}}
+#          pip3 install conan
+#          which conan
+#          conan install -if ${{github.workspace}}/build ${{github.workspace}}
           ./scripts/installRequirementsOsx.sh
 
       - name: Configure CMake

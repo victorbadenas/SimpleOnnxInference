@@ -2,7 +2,7 @@
 
 set -ex
 
-scriptDir=$(grealpath "$(dirname "$0")")
+scriptDir=$( cd "$(dirname "$0")" ; pwd -P )
 OnnxDir=~/.local/include/onnxruntime
 OpenCVDir=/usr/local/share/OpenCV
 
