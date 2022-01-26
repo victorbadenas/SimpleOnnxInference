@@ -35,9 +35,7 @@ private:
     Ort::Env m_environment = Ort::Env(nullptr);
     Ort::SessionOptions m_sessionOptions = Ort::SessionOptions(nullptr);
     std::shared_ptr<Ort::Session> m_session;
-    Ort::MemoryInfo m_memoryInfo = Ort::MemoryInfo::CreateCpu(
-            OrtAllocatorType::OrtArenaAllocator,
-            OrtMemType::OrtMemTypeDefault);
+    Ort::AllocatorWithDefaultOptions m_allocator;
 
     // Getter Graph parameters
     size_t GetSessionInputCount();

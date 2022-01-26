@@ -6,7 +6,7 @@
 OnnxInferenceRunner::OnnxInferenceRunner(
 ):
     m_loggingLevel(OrtLoggingLevel::ORT_LOGGING_LEVEL_WARNING),
-    m_intraNumThreads(0),
+    m_intraNumThreads(1),
     m_graphOptLevel(GraphOptimizationLevel::ORT_DISABLE_ALL)
 {
     CreateEnv();
@@ -42,27 +42,22 @@ void OnnxInferenceRunner::CreateSessionOptions() {
     m_sessionOptions.SetGraphOptimizationLevel(m_graphOptLevel);
 }
 
-/* inference member functions */
+/* Input preprocessing functions */
 
-// run inference for cv::Mat structure
-std::vector<float> OnnxInferenceRunner::run(cv::Mat imageData) {
-    if (m_session == nullptr)
-        throw std::runtime_error("Session not yet initialized (model not loaded)");
+// preprocess image for network
+cv::Mat OnnxInferenceRunner::preprocessImage(const cv::Mat& imageData) {
+    cv::Mat resizedImageBGR, resizedImageRGB, resizedImage, normalizedImage, preprocessedImage;
+    std::vector<int64_t> inputDims = GetSessionInputNodeDims(0);
 
-    std::vector<int64_t> inputNodeDims = GetSessionInputNodeDims(0);
-    std::vector<int64_t> outputNodeDims = GetSessionOutputNodeDims(0);
-    size_t inputTensorSize = vectorProduct(inputNodeDims);
-    size_t outputTensorSize = vectorProduct(outputNodeDims);
-    std::vector<float> inputBuffer(inputTensorSize), outputBuffer(outputTensorSize);
-    std::vector<const char*> inputNames{GetSessionInputName(0)}, outputNames{GetSessionOutputName(0)};
-    std::vector<Ort::Value> inputTensors, outputTensors;
-
-    inputBuffer.assign(imageData.begin<float>(), imageData.end<float>());
-    inputTensors.push_back(Ort::Value::CreateTensor<float>(m_memoryInfo, inputBuffer.data(), inputTensorSize, inputNodeDims.data(), inputNodeDims.size()));
-    outputTensors.push_back(Ort::Value::CreateTensor<float>(m_memoryInfo, outputBuffer.data(), outputTensorSize, outputNodeDims.data(), outputNodeDims.size()));
-    m_session->Run(Ort::RunOptions{nullptr}, inputNames.data(), inputTensors.data(), 1, outputNames.data(), outputTensors.data(), 1);
-    return outputBuffer;
+    cv::resize(imageData, resizedImageBGR, cv::Size(inputDims.at(2), inputDims.at(3)), cv::InterpolationFlags::INTER_CUBIC);
+    cv::cvtColor(resizedImageBGR, resizedImageRGB, cv::ColorConversionCodes::COLOR_BGR2RGB);
+    resizedImageRGB.convertTo(resizedImage, CV_32F, 1.0 / 255);
+    normalizedImage = normalizePerChannel(resizedImage, std::vector<float>{0.485, 0.456, 0.406}, std::vector<float>{0.229, 0.224, 0.225});
+    cv::dnn::blobFromImage(normalizedImage, preprocessedImage);
+    return preprocessedImage;
 }
+
+/* inference member functions */
 
 // run inference for image from path
 std::vector<float> OnnxInferenceRunner::run(fs::path imagePath) {
@@ -71,24 +66,29 @@ std::vector<float> OnnxInferenceRunner::run(fs::path imagePath) {
     return run(image);
 }
 
-/* Input preprocessing functions */
+// run inference for cv::Mat structure
+std::vector<float> OnnxInferenceRunner::run(cv::Mat imageData) {
+    if (m_session == nullptr)
+        throw std::runtime_error("Session not yet initialized (model not loaded)");
 
-// preprocess image for network
-cv::Mat OnnxInferenceRunner::preprocessImage(const cv::Mat& imageData) {
-    cv::Mat resizedImageBGR, resizedImageRGB, resizedImage, normalizedImage, preprocessedImage;
     std::vector<int64_t> inputDims = GetSessionInputNodeDims(0);
+    std::vector<int64_t> outputDims = GetSessionOutputNodeDims(0);
 
-//    std::cout << "M = " << imageData << std::endl;
-    cv::resize(imageData, resizedImageBGR, cv::Size(inputDims.at(2), inputDims.at(3)), cv::InterpolationFlags::INTER_CUBIC);
-//    std::cout << "M = " << resizedImageBGR << std::endl;
-    cv::cvtColor(resizedImageBGR, resizedImageRGB, cv::ColorConversionCodes::COLOR_BGR2RGB);
-//    std::cout << "M = " << resizedImageRGB << std::endl;
-    resizedImageRGB.convertTo(resizedImage, CV_32F, 1.0 / 255);
-//    std::cout << "M = " << resizedImage << std::endl;
-    normalizedImage = normalizePerChannel(resizedImage, std::vector<float>{0.485, 0.456, 0.406}, std::vector<float>{0.229, 0.224, 0.225});
-//    std::cout << "M = " << normalizedImage << std::endl;
-    cv::dnn::blobFromImage(normalizedImage, preprocessedImage);
-    return preprocessedImage;
+    size_t inputTensorSize = vectorProduct(inputDims);
+    std::vector<float> inputTensorValues(inputTensorSize);
+    inputTensorValues.assign(imageData.begin<float>(), imageData.end<float>());
+
+    size_t outputTensorSize = vectorProduct(outputDims);
+    std::vector<float> outputTensorValues(outputTensorSize);
+
+    std::vector<const char*> inputNames{GetSessionInputName(0)}, outputNames{GetSessionOutputName(0)};
+    std::vector<Ort::Value> inputTensors, outputTensors;
+
+    Ort::MemoryInfo memoryInfo = Ort::MemoryInfo::CreateCpu(OrtAllocatorType::OrtArenaAllocator,OrtMemType::OrtMemTypeDefault);
+    inputTensors.push_back(Ort::Value::CreateTensor<float>(memoryInfo, inputTensorValues.data(), inputTensorSize, inputDims.data(), inputDims.size()));
+    outputTensors.push_back(Ort::Value::CreateTensor<float>(memoryInfo, outputTensorValues.data(), outputTensorSize, outputDims.data(), outputDims.size()));
+    m_session->Run(Ort::RunOptions{nullptr}, inputNames.data(), inputTensors.data(), 1, outputNames.data(), outputTensors.data(), 1);
+    return outputTensorValues;
 }
 
 /* onnx session parameters getters */
@@ -139,16 +139,16 @@ const char *OnnxInferenceRunner::GetSessionInputName(size_t index) {
     if (nullptr == m_session) {
         throw std::runtime_error("Session not yet initialized (model not loaded)");
     }
-    Ort::AllocatorWithDefaultOptions allocator;
-    return m_session->GetInputName(index, allocator);
+//    Ort::AllocatorWithDefaultOptions allocator;
+    return m_session->GetInputName(index, m_allocator);
 }
 
 const char *OnnxInferenceRunner::GetSessionOutputName(size_t index) {
     if (nullptr == m_session) {
         throw std::runtime_error("Session not yet initialized (model not loaded)");
     }
-    Ort::AllocatorWithDefaultOptions allocator;
-    return m_session->GetOutputName(index, allocator);
+//    Ort::AllocatorWithDefaultOptions allocator;
+    return m_session->GetOutputName(index, m_allocator);
 }
 
 /* toString methods for printing onnx sessions' parameters */
