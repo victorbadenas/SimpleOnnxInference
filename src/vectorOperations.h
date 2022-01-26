@@ -12,11 +12,6 @@ T vectorProduct(const std::vector<T>& v)
 }
 
 template <typename T>
-void copyVector(std::vector<T> source, std::vector<T>& target) {
-    std::copy(source.begin(), source.end(), std::back_inserter(target));
-}
-
-template <typename T>
 void softmax(std::vector<T>& vector) {
     T expSum = 0.0;
     for (size_t i=0; i<vector.size(); ++i)
