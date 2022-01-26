@@ -2,7 +2,7 @@
 
 set -ex
 
-scriptDir=$(realpath "$(dirname "$0")")
+scriptDir=$(grealpath "$(dirname "$0")")
 OnnxDir=~/.local/include/onnxruntime
 OpenCVDir=/usr/local/share/OpenCV
 
