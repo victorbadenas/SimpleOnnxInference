@@ -23,7 +23,7 @@ jobs:
     - name: installRequirements
       run: |
         pip install conan
-        conan install -if build/
+        conan install -if build/ .
         ./scripts/installRequirements.sh
 
     - name: Configure CMake
