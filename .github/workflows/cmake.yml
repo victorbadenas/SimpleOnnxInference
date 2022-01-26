@@ -39,9 +39,7 @@ jobs:
 
     - name: Run
       run: |
-        pwd
-        ls ./build/bin
-        ./${{github.workspace}}/build/bin/main -m data/squeezenet1.1-7.onnx -i data/pez-dorado_526_0_600.jpg -l data/imagenet_synset.txt
+        ./build/bin/main -m data/squeezenet1.1-7.onnx -i data/pez-dorado_526_0_600.jpg -l data/imagenet_synset.txt
 
     - name: Test
       working-directory: ${{github.workspace}}/build
@@ -67,4 +65,4 @@ jobs:
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
       - name: Run
-        run: ./${{github.workspace}}/build/bin/main -m data/squeezenet1.1-7.onnx -i data/pez-dorado_526_0_600.jpg -l data/imagenet_synset.txt
+        run: ./build/bin/main -m data/squeezenet1.1-7.onnx -i data/pez-dorado_526_0_600.jpg -l data/imagenet_synset.txt
