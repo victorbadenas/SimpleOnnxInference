@@ -48,7 +48,8 @@ jobs:
 
       - name: installRequirements
         run: |
-          pip install conan
+          pip3 install conan
+          which conan
           conan install -if ${{github.workspace}}/build ${{github.workspace}}
           ./scripts/installRequirementsOsx.sh
 
