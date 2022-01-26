@@ -11,9 +11,9 @@ function installOnnx {
 
     cd /tmp
     wget https://github.com/microsoft/onnxruntime/releases/download/v1.10.0/onnxruntime-osx-x86_64-1.10.0.tgz
-    tar -xvf onnxruntime-linux-osx-*.tgz
+    tar -xvf onnxruntime-osx-*.tgz
     mkdir -p $OnnxDir
-    mv onnxruntime-linux-osx-*/* $OnnxDir
+    mv onnxruntime-osx-*/* $OnnxDir
     cd -
 }
 
