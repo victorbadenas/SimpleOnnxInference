@@ -1,3 +1,4 @@
+#include <fstream>
 #include "FileSystem.h"
 
 bool FileSystem::fileExists(fs::path &pathToFile) {
@@ -17,4 +18,19 @@ cv::Mat FileSystem::loadImage(std::string &stringPath) {
 cv::Mat FileSystem::loadImage(fs::path &pathToFile) {
     std::string stringPath(pathToFile);
     return loadImage(stringPath);
+}
+
+FileSystem::Lines FileSystem::readLines(fs::path &pathToFile) {
+    if (!fileExists(pathToFile))
+        throw FileDoesNotExist(pathToFile);
+
+    Lines fileData;
+    std::ifstream in(pathToFile.c_str());
+    std::string line;
+    while (std::getline(in, line)) {
+        if (!line.empty()) {
+            fileData.push_back(line);
+        }
+    }
+    return fileData;
 }

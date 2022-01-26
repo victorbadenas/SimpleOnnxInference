@@ -88,6 +88,7 @@ std::vector<float> OnnxInferenceRunner::run(cv::Mat imageData) {
     inputTensors.push_back(Ort::Value::CreateTensor<float>(memoryInfo, inputTensorValues.data(), inputTensorSize, inputDims.data(), inputDims.size()));
     outputTensors.push_back(Ort::Value::CreateTensor<float>(memoryInfo, outputTensorValues.data(), outputTensorSize, outputDims.data(), outputDims.size()));
     m_session->Run(Ort::RunOptions{nullptr}, inputNames.data(), inputTensors.data(), 1, outputNames.data(), outputTensors.data(), 1);
+    softmax(outputTensorValues);
     return outputTensorValues;
 }
 
@@ -175,6 +176,29 @@ std::string OnnxInferenceRunner::toString() {
         os << "Shape=" << GetSessionOutputNodeDims(i) << std::endl;
     }
     return os.str();
+}
+
+OnnxInferenceRunner::Result OnnxInferenceRunner::getResults(OnnxInferenceRunner::Logits logits) {
+    size_t maxElementIndex = std::max_element(logits.begin(),logits.end()) - logits.begin();
+    float maxElement = *std::max_element(logits.begin(), logits.end());
+    float minElement = *std::min_element(logits.begin(), logits.end());
+
+    std::string label;
+    if (m_labels.size() == logits.size() && !m_labels.empty()) {
+        label = m_labels.at(maxElementIndex);
+    } else {
+        std::cout << "labels not loaded or number of labels does not match output array size. Not reporting human readable label." << std::endl;
+    }
+    return {maxElementIndex, maxElement - minElement, label};
+}
+
+void OnnxInferenceRunner::loadLabels(fs::path labelPath) {
+    try {
+        m_labels = FileSystem::readLines(labelPath);
+    } catch (std::exception& exception) {
+        std::cout << "Something happened when parsing label file. Defaulting to behaviour with no labelFile." << std::endl;
+        std::cout << "Original Exception: " << exception.what() << std::endl;
+    }
 }
 
 std::string onnxDataTypeToString(ONNXTensorElementDataType dataType) {

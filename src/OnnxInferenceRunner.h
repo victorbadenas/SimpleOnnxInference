@@ -15,12 +15,16 @@ std::string onnxDataTypeToString(ONNXTensorElementDataType dataType);
 
 class OnnxInferenceRunner {
 public:
+    typedef std::tuple<int, float, std::string> Result;
+    typedef std::vector<float> Logits;
     OnnxInferenceRunner();
     std::string toString();
     void loadModel(fs::path modelPath);
+    void loadLabels(fs::path labelPath);
 
-    std::vector<float> run(fs::path imagePath);
-    std::vector<float> run(cv::Mat imageData);
+    Logits run(fs::path imagePath);
+    Logits run(cv::Mat imageData);
+    Result getResults(Logits logits);
 private:
     // Image preprocessing
     cv::Mat preprocessImage(const cv::Mat& imageData);
@@ -30,6 +34,7 @@ private:
     int m_intraNumThreads;
     GraphOptimizationLevel m_graphOptLevel;
     std::string m_logId;
+    std::vector<std::string> m_labels{};
 
     // Onnx Variables
     Ort::Env m_environment = Ort::Env(nullptr);
@@ -50,6 +55,8 @@ private:
     // Setup methods
     void CreateEnv();
     void CreateSessionOptions();
+
+    std::string getLabel(size_t index);
 };
 
 #endif //TESTONNXRUNTIME_ONNXINFERENCERUNNER_H
