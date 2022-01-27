@@ -9,6 +9,7 @@ OpenCVDir=/usr/local/share/OpenCV
 function installOnnx {
     echo Installing onnx in $OnnxDir ...
 
+    brew install onnxruntime
     cd /tmp
     wget https://github.com/microsoft/onnxruntime/releases/download/v1.10.0/onnxruntime-osx-x86_64-1.10.0.tgz
     tar -xvf onnxruntime-osx-*.tgz
