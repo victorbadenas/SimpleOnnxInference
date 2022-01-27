@@ -1,7 +1,9 @@
 # SimpleOnnxInference
 
 ![CI](https://github.com/vbadenas/SimpleOnnxInference/actions/workflows/cmake.yml/badge.svg?style=flat)
-![ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=flat&logo=ubuntu&logoColor=black)
+![ubuntu](	https://img.shields.io/badge/Debian-A81D33?style=flat&logo=debian&logoColor=white)
+![macos](https://img.shields.io/badge/mac%20os-000000?style=flat&logo=apple&logoColor=white)
+![win](https://img.shields.io/badge/Windows-0078D6?style=flat&logo=windows&logoColor=white)
 
 ![c++](https://img.shields.io/static/v1?label=C%2B%2B&message=20&color=lightblue&style=flat&logo=c%2B%2B&logoColor=blue&labelColor=white)
 ![onnxruntime](https://img.shields.io/static/v1?label=onnxruntime&message=1.10&color=lightblue&style=flat&logo=onnx&logoColor=blue&labelColor=white)
