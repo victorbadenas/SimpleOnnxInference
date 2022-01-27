@@ -17,9 +17,9 @@ Set-Location .\external\
 git clone https://github.com/vbadenas/learnopencv.git
 Set-Location .\learnopencv\InstallScripts\Windows-3
 python main.py
-installOpenCV_modified.bat
+cmd.exe /c 'installOpenCV_modified.bat'
 python modifyBatchScript.py
-finalScript.bat
+cmd.exe /c 'finalScript.bat'
 
 
 # Onnx install
