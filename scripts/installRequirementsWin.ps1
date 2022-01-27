@@ -10,3 +10,5 @@ Set-Location .\build\
 cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX="..\..\" -D BUILD_LIST=core,improc,imgcodecs,dnn ..
 make -j8
 make install
+
+# Onnx install
