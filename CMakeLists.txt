@@ -23,6 +23,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_BINARY_DIR} "${CMAKE_CURRENT_
 
 # find packages
 find_package(cxxopts REQUIRED)
+find_package(glog REQUIRED)
 find_package(OpenCV REQUIRED)
 
 # opencv variable logging
@@ -85,7 +86,7 @@ add_library(utils STATIC
     src/OnnxInferenceRunner.cpp
 )
 
-target_link_libraries(utils PUBLIC ${OpenCV_LIBS})
+target_link_libraries(utils PUBLIC ${OpenCV_LIBS} glog)
 
 add_executable(main src/main.cpp)
-target_link_libraries(main PUBLIC utils onnxruntime cxxopts::cxxopts)
+target_link_libraries(main PUBLIC utils onnxruntime cxxopts::cxxopts glog)

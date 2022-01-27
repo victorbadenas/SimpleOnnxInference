@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cxxopts.hpp>
+#include <glog/logging.h>
 #include "OnnxInferenceRunner.h"
 
 namespace fs = std::filesystem;
@@ -26,7 +27,7 @@ cxxopts::ParseResult parseArgumentsFromCommandLine(int argc, char** argv) {
 }
 
 
-int main(int argc, char** argv){
+int main(int argc, char** argv) {
     cxxopts::ParseResult argStruct = parseArgumentsFromCommandLine(argc, argv);
 
     fs::path modelPath = argStruct["modelPath"].as<fs::path>();
@@ -34,12 +35,16 @@ int main(int argc, char** argv){
     fs::path labelPath = argStruct["labelPath"].as<fs::path>();
     bool debug = argStruct["debug"].as<bool>();
 
+    google::InitGoogleLogging(argv[0]);
     std::cout << "------------ script parameters ------------" << std::endl;
     std::cout << "Running " << argv[0] << " with args:" << std::endl;
     std::cout << "modelPath: " << modelPath << std::endl;
     std::cout << "imagePath: " << imagePath << std::endl;
     std::cout << "labelPath: " << labelPath << std::endl;
     std::cout << "debug: " << debug << std::endl;
+
+    VLOG(1) << "verbose 1" << std::endl;
+    VLOG(2) << "verbose 2" << std::endl;
 
     OnnxInferenceRunner onnxInferenceRunner;
     onnxInferenceRunner.loadModel(modelPath);
@@ -58,5 +63,7 @@ int main(int argc, char** argv){
     std::cout << "Index: " << std::get<0>(result) << std::endl;
     std::cout << "Confidence: " << std::get<1>(result) << std::endl;
     std::cout << "Label: " << std::get<2>(result) << std::endl;
+
+    google::ShutdownGoogleLogging();
     return 0;
 }
