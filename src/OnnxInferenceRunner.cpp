@@ -14,7 +14,7 @@ OnnxInferenceRunner::OnnxInferenceRunner(
 }
 
 // load onnx file
-void OnnxInferenceRunner::loadModel(fs::path modelPath) {
+void OnnxInferenceRunner::loadModel(const fs::path& modelPath) {
     if (!FileSystem::fileExists(modelPath)) {
         throw FileDoesNotExist(modelPath);
     }
@@ -60,7 +60,7 @@ cv::Mat OnnxInferenceRunner::preprocessImage(const cv::Mat& imageData) {
 /* inference member functions */
 
 // run inference for image from path
-std::vector<float> OnnxInferenceRunner::run(fs::path imagePath) {
+std::vector<float> OnnxInferenceRunner::run(const fs::path& imagePath) {
     cv::Mat image = FileSystem::loadImage(imagePath);
     image = preprocessImage(image);
     return run(image);
@@ -192,7 +192,7 @@ OnnxInferenceRunner::Result OnnxInferenceRunner::getResults(OnnxInferenceRunner:
     return {maxElementIndex, maxElement - minElement, label};
 }
 
-void OnnxInferenceRunner::loadLabels(fs::path labelPath) {
+void OnnxInferenceRunner::loadLabels(const fs::path& labelPath) {
     try {
         m_labels = FileSystem::readLines(labelPath);
     } catch (std::exception& exception) {

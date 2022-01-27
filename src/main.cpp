@@ -4,13 +4,15 @@
 
 namespace fs = std::filesystem;
 
+const std::string DEFAULT_LABEL_FILE = "skip";
+
 cxxopts::ParseResult parseArgumentsFromCommandLine(int argc, char** argv) {
     cxxopts::Options options(argv[0], "A short test of onnx runtime inference.");
 
     options.allow_unrecognised_options().add_options()
         ("m,modelPath", "Onnx model path", cxxopts::value<fs::path>())
         ("i,imagePath", "Input Image", cxxopts::value<fs::path>())
-        ("l,labelPath", "Label File", cxxopts::value<fs::path>()->default_value(""))
+        ("l,labelPath", "Label File", cxxopts::value<fs::path>()->default_value(DEFAULT_LABEL_FILE))
         ("d,debug", "Enable debugging", cxxopts::value<bool>()->default_value("false"))
         ("h,help", "Print usage");
 
@@ -41,15 +43,15 @@ int main(int argc, char** argv){
 
     OnnxInferenceRunner onnxInferenceRunner;
     onnxInferenceRunner.loadModel(modelPath);
-    if (labelPath != "")
+    if (labelPath != DEFAULT_LABEL_FILE)
         onnxInferenceRunner.loadLabels(labelPath);
 
     std::cout << "-------- onnx inference parameters --------" << std::endl;
     std::cout << onnxInferenceRunner.toString();
 
     std::cout << "----------------- logits ------------------" << std::endl;
-    OnnxInferenceRunner::Logits logits= onnxInferenceRunner.run(imagePath);
-    std::cout << onnxInferenceRunner.run(imagePath) << std::endl;
+    OnnxInferenceRunner::Logits logits = onnxInferenceRunner.run(imagePath);
+    std::cout << logits << std::endl;
 
     std::cout << "------------------results------------------" << std::endl;
     OnnxInferenceRunner::Result result = onnxInferenceRunner.getResults(logits);
