@@ -1,3 +1,7 @@
+Set-PSDebug -Trace 1
+$ErrorActionPreference = "Stop"
+Get-Location
+
 New-Item -ItemType directory -Path .\external\
 Set-Location .\external\
 
