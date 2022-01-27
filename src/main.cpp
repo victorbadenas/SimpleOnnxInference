@@ -48,8 +48,8 @@ int main(int argc, char** argv){
     std::cout << onnxInferenceRunner.toString();
 
     std::cout << "----------------- logits ------------------" << std::endl;
-    OnnxInferenceRunner::Logits logits= onnxInferenceRunner.run(imagePath);
-    std::cout << onnxInferenceRunner.run(imagePath) << std::endl;
+    OnnxInferenceRunner::Logits logits = onnxInferenceRunner.run(imagePath);
+    std::cout << logits << std::endl;
 
     std::cout << "------------------results------------------" << std::endl;
     OnnxInferenceRunner::Result result = onnxInferenceRunner.getResults(logits);

@@ -19,10 +19,10 @@ public:
     typedef std::vector<float> Logits;
     OnnxInferenceRunner();
     std::string toString();
-    void loadModel(fs::path modelPath);
-    void loadLabels(fs::path labelPath);
+    void loadModel(const fs::path& modelPath);
+    void loadLabels(const fs::path& labelPath);
 
-    Logits run(fs::path imagePath);
+    Logits run(const fs::path& imagePath);
     Logits run(cv::Mat imageData);
     Result getResults(Logits logits);
 private:
@@ -55,8 +55,6 @@ private:
     // Setup methods
     void CreateEnv();
     void CreateSessionOptions();
-
-    std::string getLabel(size_t index);
 };
 
 #endif //TESTONNXRUNTIME_ONNXINFERENCERUNNER_H

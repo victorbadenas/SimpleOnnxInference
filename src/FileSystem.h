@@ -14,11 +14,11 @@ class FileSystem {
 public:
     typedef std::vector<std::string> Lines;
 
-    static bool fileExists(fs::path &pathToFile);
-    static bool checkFileExtension(fs::path &pathToFile, std::string extension);
-    static cv::Mat loadImage(fs::path &pathToFile);
-    static cv::Mat loadImage(std::string &stringPath);
-    static Lines readLines(fs::path &pathToFile);
+    static bool fileExists(const fs::path& pathToFile);
+    static bool checkFileExtension(const fs::path& pathToFile, const std::string& extension);
+    static cv::Mat loadImage(const fs::path& pathToFile);
+    static cv::Mat loadImage(const std::string& stringPath);
+    static Lines readLines(const fs::path& pathToFile);
 };
 
 #endif //TESTONNXRUNTIME_FILESYSTEM_H
